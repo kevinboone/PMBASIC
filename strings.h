@@ -1,0 +1,78 @@
+/*============================================================================
+  
+  pmbasic
+
+  strings.h
+
+  String table functions. See strings.c for more details.
+
+  Copyright (c)1990-2020 Kevin Boone. Distributed under the terms of the
+  GNU Public Licence, v3.0
+
+  ==========================================================================*/
+
+#pragma once
+
+#include "defs.h"
+
+// Define offsets into the global stringtable, to make code management
+//  in the rest of the application a little easier. It's still a drag,
+//  though.
+#define STRINGS_FIRST_ERR_CODE 0
+#define STRINGS_FIRST_KEYWORD  30
+#define STRINGS_FIRST_GEN_TEXT 60 
+#define STRINGS_FIRST_CMD      80
+#define STRINGS_FIRST_HELP     100 
+#define STRINGS_NUM_HELP       12 
+
+#define STRING_INDEX_PRINT (STRINGS_FIRST_KEYWORD + 0)
+#define STRING_INDEX_IF (STRINGS_FIRST_KEYWORD + 1)
+#define STRING_INDEX_THEN (STRINGS_FIRST_KEYWORD + 2)
+#define STRING_INDEX_ELSE (STRINGS_FIRST_KEYWORD + 3)
+#define STRING_INDEX_NOT (STRINGS_FIRST_KEYWORD + 4)
+#define STRING_INDEX_GOTO (STRINGS_FIRST_KEYWORD + 5)
+#define STRING_INDEX_GOSUB (STRINGS_FIRST_KEYWORD + 6)
+#define STRING_INDEX_END (STRINGS_FIRST_KEYWORD + 7)
+#define STRING_INDEX_RETURN (STRINGS_FIRST_KEYWORD + 8)
+#define STRING_INDEX_REM (STRINGS_FIRST_KEYWORD + 9)
+#define STRING_INDEX_FOR (STRINGS_FIRST_KEYWORD + 10)
+#define STRING_INDEX_NEXT (STRINGS_FIRST_KEYWORD + 11)
+#define STRING_INDEX_TO (STRINGS_FIRST_KEYWORD + 12)
+#define STRING_INDEX_LET (STRINGS_FIRST_KEYWORD + 13)
+#define STRING_INDEX_INPUT (STRINGS_FIRST_KEYWORD + 14)
+#define STRING_INDEX_MILLIS (STRINGS_FIRST_KEYWORD + 15)
+#define STRING_INDEX_DELAY (STRINGS_FIRST_KEYWORD + 16)
+#define STRING_INDEX_PEEK (STRINGS_FIRST_KEYWORD + 17)
+#define STRING_INDEX_POKE (STRINGS_FIRST_KEYWORD + 18)
+#define STRING_INDEX_DIGITALREAD (STRINGS_FIRST_KEYWORD + 19)
+#define STRING_INDEX_DIGITALWRITE (STRINGS_FIRST_KEYWORD + 20)
+#define STRING_INDEX_PINMODE (STRINGS_FIRST_KEYWORD + 21)
+#define STRING_INDEX_ANALOGREAD (STRINGS_FIRST_KEYWORD + 22)
+#define STRING_INDEX_ANALOGWRITE (STRINGS_FIRST_KEYWORD + 23)
+
+#define STRING_INDEX_LIST (STRINGS_FIRST_CMD + 0)
+#define STRING_INDEX_RUN (STRINGS_FIRST_CMD + 1)
+#define STRING_INDEX_QUIT (STRINGS_FIRST_CMD + 2)
+#define STRING_INDEX_SAVE (STRINGS_FIRST_CMD + 3)
+#define STRING_INDEX_LOAD (STRINGS_FIRST_CMD + 4)
+#define STRING_INDEX_INFO (STRINGS_FIRST_CMD + 5)
+#define STRING_INDEX_NEW (STRINGS_FIRST_CMD + 6)
+#define STRING_INDEX_HELP (STRINGS_FIRST_CMD + 7)
+#define STRING_INDEX_CLEAR (STRINGS_FIRST_CMD + 8)
+
+#define STRING_INDEX_LINE_DELETED (STRINGS_FIRST_GEN_TEXT + 2)
+#define STRING_INDEX_PROG_SIZE (STRINGS_FIRST_GEN_TEXT + 8)
+#define STRING_INDEX_BYTES (STRINGS_FIRST_GEN_TEXT + 9)
+#define STRING_INDEX_TOT_RAM (STRINGS_FIRST_GEN_TEXT + 10)
+#define STRING_INDEX_TOT_EEPROM (STRINGS_FIRST_GEN_TEXT + 11)
+#define STRING_INDEX_VERSION (STRINGS_FIRST_GEN_TEXT + 12)
+#define STRING_INDEX_FREE_RAM (STRINGS_FIRST_GEN_TEXT + 13)
+
+BEGIN_DECLS
+
+extern void strings_get (uint8_t n, char *buff, uint8_t len);
+extern BOOL strings_compare_index (const char *s, uint8_t index);
+extern void strings_output_string (uint8_t index);
+
+END_DECLS
+

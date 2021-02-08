@@ -1,0 +1,43 @@
+CC=gcc
+CPP=g++
+
+NAME=pmbasic
+VERSION=0.2
+
+CFLAGS=-Wall -Wextra -g -DVERSION=\"$(VERSION)\"
+CPPFLAGS=$(CFLAGS)
+
+all: $(NAME)
+
+$(NAME): pmbasic.o tokenizer.o parser.o klist.o basicprogram.o strings.o linuxinterface.o variabletable.o variable.o
+	$(CPP) -o $(NAME) pmbasic.o tokenizer.o parser.o klist.o basicprogram.o strings.o linuxinterface.o variabletable.o variable.o
+
+pmbasic.o: pmbasic.c tokenizer.h config.h defs.h basicprogram.h variabletable.h
+	$(CC) $(CFLAGS) -o pmbasic.o -c pmbasic.c
+
+tokenizer.o: tokenizer.c defs.h config.h
+	$(CC) $(CFLAGS) -o tokenizer.o -c tokenizer.c
+
+parser.o: parser.c defs.h config.h tokenizer.h klist.h basicprogram.h strings.h interface.h variabletable.h variable.h
+	$(CC) $(CFLAGS) -o parser.o -c parser.c
+
+klist.o: klist.c defs.h config.h klist.h
+	$(CC) $(CFLAGS) -o klist.o -c klist.c
+
+strings.o: strings.c defs.h config.h strings.h
+	$(CC) $(CFLAGS) -o strings.o -c strings.c
+
+variabletable.o: variabletable.c defs.h config.h variabletable.h
+	$(CC) $(CFLAGS) -o variabletable.o -c variabletable.c
+
+variable.o: variable.c defs.h config.h variable.h
+	$(CC) $(CFLAGS) -o variable.o -c variable.c
+
+linuxinterface.o: linuxinterface.c defs.h config.h interface.h
+	$(CC) $(CFLAGS) -o linuxinterface.o -c linuxinterface.c
+
+basicprogram.o: basicprogram.c defs.h config.h basicprogram.h
+	$(CC) $(CFLAGS) -o basicprogram.o -c basicprogram.c
+
+clean:
+	rm -f $(NAME) *.o

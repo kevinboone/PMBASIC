@@ -1,0 +1,145 @@
+#===========================================================================
+# pmbasic
+# Makefile for Arduino version of PMBASIC. Some directories 
+#  will need to be changed from the defaults in this file
+#  to indicate where the general Aurduino headers and libraries are, 
+#  and also the board-specific headers. Of course, if building for
+#  anything except Pro Micro or Leonard, you'll need to change MCU. The
+#  program may still run if this is wrong (naybe), but all the RAM, etc.,
+#  sizes will be wrong, and results may be erratic.
+# The complexity stems from the fact that we have to compile the Arduino
+#  libraries as well as the program source, and both are in a mixture of
+# C and C++
+#===========================================================================
+
+CC=avr-gcc
+CPP=avr-g++
+
+NAME=pmbasic
+VERSION=0.2
+TARGET=$(NAME).hex
+
+OBJCOPY=avr-objcopy
+AVRDUDE=avrdude
+
+# Specify the chip type and speed
+MCU=atmega32u4
+F_CPU=16000000
+
+UPLOAD_DEV=/dev/ttyACM0
+UPLOAD_BAUD=57600
+
+# Location of the main arduino installation, if you installed a package
+# from a standard repository.
+ARDUINO_DIR=/usr/share/arduino
+
+# Directory that contains the Arduino library files. These are supplied
+# in the form of source code, not complied code. This is the directory
+# that contains main.cpp, USBAPI.h, etc. If you didn't get the Arduino
+# library as part of a package, you'll have to specify this manually.
+# Otherwise, specify the location relative to ARDUINO_DIR
+LIBRARY_DIR=$(ARDUINO_DIR)/hardware/arduino/avr/cores/arduino
+
+EEPROM_INCLUDE=$(ARDUINO_DIR)/hardware/arduino/avr/libraries/EEPROM/src
+
+# Specify the location of the header files for the Pro Micro variant
+# of Arduino. A directory under .arduino15 is what you get if you 
+# use the Arduino IDE to install this support
+VARIANT_INCLUDE=/home/kevin/.arduino15/packages/SparkFun/hardware/avr/1.1.13/variants/promicro
+
+INCLUDE=$(LIBRARY_DIR)
+INCLUDES=-I$(VARIANT_INCLUDE) -I $(INCLUDE) -I $(EEPROM_INCLUDE)
+
+AVRCFLAGS=-mmcu=$(MCU) -DARDUINO $(INCLUDES) -DF_CPU=$(F_CPU) -MMD -DUSB_VID=0x1bf4 -DUSB_PID=0x9204
+
+CFLAGS=-Wall $(AVRCFLAGS) -Wextra -ffunction-sections -fdata-sections -Os -DVERSION=\"$(VERSION)\"
+CPPFLAGS=$(CFLAGS) -fno-exceptions -fno-threadsafe-statics
+LDFLAGS=-w -Os -flto -fuse-linker-plugin -Wl,--gc-sections -s -mmcu=$(MCU)
+
+all: $(TARGET)
+
+# Link
+
+$(NAME).elf: pmbasic.o variabletable.o variable.o tokenizer.o parser.o klist.o basicprogram.o strings.o arduinointerface.o HardwareSerial.o Print.o USBCore.o CDC.o wiring.o main.o PluggableUSB.o hooks.o abi.o wiring_digital.o wiring_analog.o
+	$(CPP) $(LDFLAGS) -o $(NAME).elf pmbasic.o variabletable.o variable.o tokenizer.o parser.o klist.o basicprogram.o strings.o arduinointerface.o HardwareSerial.o Print.o USBCore.o CDC.o wiring.o main.o PluggableUSB.o hooks.o abi.o wiring_digital.o wiring_analog.o
+
+# Arduino library sources
+
+HardwareSerial.o: $(LIBRARY_DIR)/HardwareSerial.cpp 
+	$(CPP) $(CPPFLAGS) -o HardwareSerial.o -c $(LIBRARY_DIR)/HardwareSerial.cpp 
+
+Print.o: $(LIBRARY_DIR)/Print.cpp 
+	$(CPP) $(CPPFLAGS) -o Print.o -c $(LIBRARY_DIR)/Print.cpp 
+
+USBCore.o: $(LIBRARY_DIR)/USBCore.cpp 
+	$(CPP) $(CPPFLAGS) -o USBCore.o -c $(LIBRARY_DIR)/USBCore.cpp 
+
+PluggableUSB.o: $(LIBRARY_DIR)/PluggableUSB.cpp 
+	$(CPP) $(CPPFLAGS) -o PluggableUSB.o -c $(LIBRARY_DIR)/PluggableUSB.cpp 
+
+main.o: $(LIBRARY_DIR)/main.cpp 
+	$(CPP) $(CPPFLAGS) -o main.o -c $(LIBRARY_DIR)/main.cpp 
+
+CDC.o: $(LIBRARY_DIR)/CDC.cpp 
+	$(CPP) $(CPPFLAGS) -o CDC.o -c $(LIBRARY_DIR)/CDC.cpp 
+
+wiring.o: $(LIBRARY_DIR)/wiring.c
+	$(CC) $(CFLAGS) -o wiring.o -c $(LIBRARY_DIR)/wiring.c 
+
+wiring_digital.o: $(LIBRARY_DIR)/wiring_digital.c
+	$(CC) $(CFLAGS) -o wiring_digital.o -c $(LIBRARY_DIR)/wiring_digital.c 
+
+wiring_analog.o: $(LIBRARY_DIR)/wiring_analog.c
+	$(CC) $(CFLAGS) -o wiring_analog.o -c $(LIBRARY_DIR)/wiring_analog.c 
+
+hooks.o: $(LIBRARY_DIR)/hooks.c
+	$(CC) $(CFLAGS) -o hooks.o -c $(LIBRARY_DIR)/hooks.c 
+
+abi.o: $(LIBRARY_DIR)/abi.cpp
+	$(CPP) $(CPPFLAGS) -o abi.o -c $(LIBRARY_DIR)/abi.cpp 
+
+# Program sources
+
+pmbasic.o: pmbasic.c tokenizer.h config.h defs.h basicprogram.h
+	$(CC) $(CFLAGS) -o pmbasic.o -c pmbasic.c
+
+tokenizer.o: tokenizer.c defs.h config.h
+	$(CC) $(CFLAGS) -o tokenizer.o -c tokenizer.c
+
+parser.o: parser.c defs.h config.h tokenizer.h klist.h basicprogram.h strings.h interface.h
+	$(CC) $(CFLAGS) -o parser.o -c parser.c
+
+klist.o: klist.c defs.h config.h klist.h
+	$(CC) $(CFLAGS) -o klist.o -c klist.c
+
+strings.o: strings.c defs.h config.h strings.h
+	$(CC) $(CFLAGS) -o strings.o -c strings.c
+
+variabletable.o: variabletable.c defs.h config.h variabletable.h
+	$(CC) $(CFLAGS) -o variabletable.o -c variabletable.c
+
+variable.o: variable.c defs.h config.h variable.h
+	$(CC) $(CFLAGS) -o variable.o -c variable.c
+
+arduinointerface.o: arduinointerface.cpp defs.h config.h interface.h arduinointerface.h
+	$(CC) $(CFLAGS) -o arduinointerface.o -c arduinointerface.cpp
+
+basicprogram.o: basicprogram.c defs.h config.h basicprogram.h
+	$(CC) $(CFLAGS) -o basicprogram.o -c basicprogram.c
+
+# Build hex and upload
+
+$(TARGET): $(NAME).elf
+	$(OBJCOPY) -O ihex -R .eeprom $(NAME).elf $(TARGET)
+	mkdir -p binaries
+	cp $(TARGET) binaries/
+
+upload: all
+	stty -F $(UPLOAD_DEV) speed 1200
+	sleep 1 
+	stty -F $(UPLOAD_DEV) speed 57600 
+	sleep 0.25 
+	$(AVRDUDE) -v -p$(MCU) -cavr109 -P$(UPLOAD_DEV) -b$(UPLOAD_BAUD) -D -Uflash:w:$(TARGET):i
+
+clean:
+	rm -f *.d *.o *.elf *.hex $(NAME)
