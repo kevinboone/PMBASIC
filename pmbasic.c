@@ -275,9 +275,6 @@ static void pmbasic_process_line (BasicProgram *bp, const char *line)
 /*===========================================================================
   pmbasic_main_loop
 ===========================================================================*/
-//static const char *p = "10 print \"foo\", \"bar\"\n20 print 2, (4)\n";
-//static const char *p = "10 print \"hello\"\n20 gosub 100\n25 print \"after\"\n30 end\n100 print \"sub\"\n110 return\n";
-static const char *p = "10 for x=42 to 44\n20 print x\n30 next\n";
 
 void pmbasic_main_loop (void)
   {
@@ -285,10 +282,7 @@ void pmbasic_main_loop (void)
   BasicProgram *bp = basicprogram_new_empty();
   VariableTable *vt = variabletable_new_empty();
   parser_set_variable_table (parser, vt);
-  basicprogram_set_program (bp, p);
-
-  uint8_t error = 0;
-  variabletable_set_number (vt, "foo", 42, &error);
+  //basicprogram_set_program (bp, p);
 
   BOOL stop = FALSE;
   do

@@ -165,6 +165,23 @@ BOOL interface_load (BasicProgram *bp)
   return FALSE;
   }
 
+/*============================================================================
+ * interface_analogwrite
+ * =========================================================================*/
+void interface_analogwrite (uint8_t pin, VARTYPE value)
+  {
+  printf ("ANALOGWRITE %d, %d not implemented\n", pin, value);
+  }
+
+/*============================================================================
+ * interface_analogread
+ * =========================================================================*/
+VARTYPE interface_analogread (uint8_t pin)
+  {
+  printf ("ANALOGREAD %d not implemented\n", pin);
+  return 0;
+  }
+
 /*===========================================================================
   main 
 ===========================================================================*/
