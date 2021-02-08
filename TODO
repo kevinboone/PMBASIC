@@ -1,12 +1,8 @@
-switchable handling of undefined vars
-switchable handling of case-sensitivity
-consider splitting a the alpha-number boundary, e.g., "?2" rather than "? 2"
-Provide a way to break out of a FOR loop 
-Allow descending counts in FOR
-Allow string variables and math. This is a big job.
-
-info -- complete this
-info -- add vartable size
-read/write EEPROM
-analog pins
+- Switchable handling of undefined vars
+- Switchable handling of case-sensitivity
+- Consider splitting a the alpha-number boundary, e.g., "?2" rather than "? 2"
+- Provide a way to break out of a FOR loop 
+- Allow descending counts in FOR
+- Allow string variables and math. This is a big job.
+- Array variables. This is a big job.
 

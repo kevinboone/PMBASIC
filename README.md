@@ -43,12 +43,12 @@ In addition, using 16-bit mode will affect things like millisecond
 timers, which have to count large numbers. Perhaps surprisingly, given
 the extra arithmetic complexity, using 32-bit mode does not make PMBASIC
 much larger -- not in terms of flash storage, anyway. However, it makes
-significantly more demands on RAM. Even though PMBASIC can only store
-26 variables, in 32-bit mode that could still amount to 10% of the
-total available RAM. Since GOTO and GOSUB statements take line numbers,
+significantly more demands on RAM. Variables, for example, will take
+twice as much RAM. 
+Since GOTO and GOSUB statements take line numbers,
 using 32-bit mode means allowing for very large line numbers -- even
-though in practice it's impossible to store more than about 50 lines
-of program. 
+though in practice it's impossible to store more than about 80 lines
+of program because of RAM limitations. 
 
 There's really no easy way to choose between 16-bit and 32-bit mode,
 nor any way to change the setting at runtime. It's a once-for-all decision
@@ -139,7 +139,8 @@ or just
  
 At the prompt, however, the `let` is required.
 
-In a break with tradition, _variables must be assigned before use_.
+In a break with tradition, _variables must be assigned before use_ -- they
+don't default to a value of zero.
 
 ### IF ... THEN and comparisons 
 
@@ -149,7 +150,8 @@ The format is
 
 These statements cannot span multiple lines. `test` can be a simple
 variable, where a zero represents 'false' and anything else 'true', or
-it can be an expression. The supported comparisons are `>`, `<` and `=`.
+it can be a comparison expression. Comparison expressions just evaluate
+to numbers with values 1 or 0. The supported comparisons are `>`, `<` and `=`.
 Comparisons can be combined -- 
 
 `if (count = 0) & (key = 27) then...`
@@ -180,11 +182,13 @@ FOR statements can be tested, to a depth
 set at compile time in `config.h`. 
 
 The value of the loop variable after the loop is one larger than
-the end value.
+the specified end value.
 
 It's possible to jump out of the middle of a loop using `GOTO`, but
 this causes a memory leak, as PMBASIC does not know that the
 data associated with the loop is no longer required.
+
+At present, `FOR` only counts in an ascending direction.
 
 ### PRINT statement
 
@@ -195,7 +199,7 @@ ends with a ';'. A `PRINT` on its own just writes a newline.
 
 ### GOTO and GOSUB
 
-`GOTO` and `GOSUB` taken an expression as arguments, so there is some
+`GOTO` and `GOSUB` take an expression as arguments, so there is some
 runtime control of where to jump to. `GOSUB` can be nested, to
 a limit defined in `config.h`  
 
@@ -231,14 +235,14 @@ Of course, using DIGITALWRITE is more elegant (and more portable)
 
 ### DELAY
 
-`DELAY {expression>}` generates a millisecond delay. When compiled
+`DELAY {expression}` generates a millisecond delay. When compiled
 in 16-bit mode, the longest delay is about 30 seconds. In 32-bit mode,
 it is days.
 
 A delay can't be interrupted using `ctrl+c`, because the logic needed to
 work out if a serial character had been received would make it impossible
 to get accurate delay timing. Of course, a `ctrl+c` will still take effect
-when the delay is finished. Delay can be used in loops to get longer
+when the delay is finished. `delay` can be used in loops to get longer
 times. The delay itself is pretty accurate, but the loop logic 
 will add a few milliseconds to each loop.
 
@@ -294,8 +298,6 @@ Reads an analog pin's state into a variable
 {pin} and {value} can be expressions. 
 
 In general, analog inputs provide values in the range 0-1023.
-
-### ANALOGREAD
 
 ### MILLIS 
 
@@ -414,8 +416,8 @@ break PMBASIC, but there's not much that can be done about this.
 
 ## QUIT
 
-Exits the PMBASIC programmer which, on a microcontroller, will cause
-it to halt.
+Exits the PMBASIC program. On a microcontroller, this just resets PMBASIC,
+as there's no where to quit _to_.
 
 ## Running a program
 
@@ -463,14 +465,22 @@ It will almost certainly be necessary to hack on the `Makefile` to
 indicate the locations of the library sources. Arduino being what it is,
 the libraries have to be compiled from source for each board, so
 the Makefile is intended to take care of this along with building the
-program. 
+program. The start of the Makefile lists a number of directories that
+will likely have to be modified. It's also rather annoying that the
+Pro Micro has a board-specific version of `pins_arduino.h`, which is
+normally standard. So you'll need to enter the location of this
+file as well -- I hope it is clear in the Makefile how to do
+that. There are instructions on the SparkFun website how to obtain
+the file -- only `pins_arduino.h` is needed to build PM basic using
+the Makefile -- the other files SparkFun provides are for the IDE. 
 
 If everything is setup properly, running
 
     $ make -f Makefile.promicro
 
 should give you a `.hex` file, ready for uploading to the board using
-`avrdude` or whatever.  
+`avrdude` or whatever. The bundle in my GitHub repository contains
+a pre-built version for Pro Micro, if you just want to try it.
 
 For testing purposes, you can build a Linux console version by doing
 
@@ -478,6 +488,9 @@ For testing purposes, you can build a Linux console version by doing
 
 The Linux version is intended to have exactly the same limited functionality
 as the Arduino build.
+
+To interact with PMBASIC, just attach a terminal to `/dev/ttyACM0`, or
+whatever the relevant port is on your system.
 
 ## Technical details
 
@@ -616,5 +629,12 @@ However, PMBASIC only occupries about 20kB of the 32kB flash in the
 Pro Micro, and it would be easy to extend it with more Arduino-specific
 capabilities. It would be easy, for example, to add code to operate
 an LCD display, or play audio tones using PWM.
+
+## More information
+
+There's more information about the background to PMBASIC on my website:
+
+http://kevinboone.me/pmbasic.html
+
 
 
